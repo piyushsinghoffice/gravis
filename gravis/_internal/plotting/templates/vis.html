@@ -1211,21 +1211,38 @@
           },
 
           parseGeneral(givenData, parsedData){
+            const generalDefaults = state.useDarkMode ? {
+              background_color: "#1f1f25",
+              arrow_color: "#7ddba3",
+              node_color: "#7ddba3",
+              node_border_color: "#f0f0f5",
+              node_label_color: "#f0f0f5",
+              edge_color: "#b5b8c5",
+              edge_label_color: "#f0f0f5",
+            } : {
+              background_color: "white",
+              arrow_color: "black",
+              node_color: "black",
+              node_border_color: "black",
+              node_label_color: "black",
+              edge_color: "black",
+              edge_label_color: "black",
+            };
             parsedData.general = {
               // General
               directed: state.manager.rawDataParser.getBool(givenData, "directed", true),
               label: state.manager.rawDataParser.getString(givenData, "label", ""),
-              background_color: state.manager.rawMetadataParser.getColor(givenData, "background_color", "white"),
-              arrow_color: state.manager.rawMetadataParser.getColor(givenData, "arrow_color", "black"),
+              background_color: state.manager.rawMetadataParser.getColor(givenData, "background_color", generalDefaults.background_color),
+              arrow_color: state.manager.rawMetadataParser.getColor(givenData, "arrow_color", generalDefaults.arrow_color),
               arrow_size: state.manager.rawMetadataParser.getFinitePositiveNumber(givenData, "arrow_size", 10.0),
               // Nodes
-              node_color: state.manager.rawMetadataParser.getColor(givenData, "node_color", "black"),
+              node_color: state.manager.rawMetadataParser.getColor(givenData, "node_color", generalDefaults.node_color),
               node_opacity: state.manager.rawMetadataParser.getFinitePositiveNumber(givenData, "node_opacity", 1.0),
               node_size: state.manager.rawMetadataParser.getFinitePositiveNumber(givenData, "node_size", 10.0),
               node_shape: state.manager.rawMetadataParser.getString(givenData, "node_shape", "circle"),
-              node_border_color: state.manager.rawMetadataParser.getColor(givenData, "node_border_color", "black"),
+              node_border_color: state.manager.rawMetadataParser.getColor(givenData, "node_border_color", generalDefaults.node_border_color),
               node_border_size: state.manager.rawMetadataParser.getFinitePositiveNumber(givenData, "node_border_size", 0.0),
-              node_label_color: state.manager.rawMetadataParser.getColor(givenData, "node_label_color", "black"),
+              node_label_color: state.manager.rawMetadataParser.getColor(givenData, "node_label_color", generalDefaults.node_label_color),
               node_label_size: state.manager.rawMetadataParser.getFinitePositiveNumber(givenData, "node_label_size", 12.0),
               node_hover: state.manager.rawMetadataParser.getString(givenData, "node_hover", ""),
               node_click: state.manager.rawMetadataParser.getString(givenData, "node_click", ""),
@@ -1236,10 +1253,10 @@
               contains_node_click: false,
               contains_node_image: false,
               // Edges
-              edge_color: state.manager.rawMetadataParser.getColor(givenData, "edge_color", "black"),
+              edge_color: state.manager.rawMetadataParser.getColor(givenData, "edge_color", generalDefaults.edge_color),
               edge_opacity: state.manager.rawMetadataParser.getFinitePositiveNumber(givenData, "edge_opacity", 1.0),
               edge_size: state.manager.rawMetadataParser.getFinitePositiveNumber(givenData, "edge_size", 1.0),
-              edge_label_color: state.manager.rawMetadataParser.getColor(givenData, "edge_label_color", "black"),
+              edge_label_color: state.manager.rawMetadataParser.getColor(givenData, "edge_label_color", generalDefaults.edge_label_color),
               edge_label_size: state.manager.rawMetadataParser.getFinitePositiveNumber(givenData, "edge_label_size", 8.0),
               edge_hover: state.manager.rawMetadataParser.getString(givenData, "edge_hover", ""),
               edge_click: state.manager.rawMetadataParser.getString(givenData, "edge_click", ""),
