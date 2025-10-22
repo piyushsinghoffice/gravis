@@ -33,7 +33,8 @@ def three(data,
           use_x_positioning_force=False, x_positioning_force_strength=0.2,
           use_y_positioning_force=False, y_positioning_force_strength=0.2,
           use_z_positioning_force=False, z_positioning_force_strength=0.2,
-          use_centering_force=True):
+          use_centering_force=True,
+          use_dark_mode=False):
     """Create an interactive graph visualization with HTML/CSS/JS based on 3d-force-graph.js.
 
     The library 3d-force-graph.js uses three.js to create a 3d visualization in WebGL,
@@ -238,6 +239,8 @@ def three(data,
         This force attracts each node towards the center of the coordinate system at (0, 0, 0)
         to keep the graph in the display area. It may lead to unexpected repulsion effects
         if all nodes are fixed and then a single one is released by dragging it.
+    use_dark_mode : bool
+        If True, the interface is rendered with a dark theme instead of the default light theme.
 
     Returns
     -------
@@ -255,6 +258,7 @@ def three(data,
     _ca(show_details_toggle_button, 'show_details_toggle_button', bool)
     _ca(show_menu, 'show_menu', bool)
     _ca(show_menu_toggle_button, 'show_menu_toggle_button', bool)
+    _ca(use_dark_mode, 'use_dark_mode', bool)
     _ca(show_node, 'show_node', bool)
     _ca(node_size_factor, 'node_size_factor', (int, float))
     _ca(node_size_data_source, 'node_size_data_source', str)
@@ -306,6 +310,7 @@ def three(data,
     _ca(use_z_positioning_force, 'use_z_positioning_force', bool)
     _ca(z_positioning_force_strength, 'z_positioning_force_strength', (int, float))
     _ca(use_centering_force, 'use_centering_force', bool)
+    _ca(use_dark_mode, 'use_dark_mode', bool)
     data = _internal.normalize_graph_data(data)
 
     # Transformation
@@ -321,6 +326,7 @@ def three(data,
         'SHOW_DETAILS_TOGGLE_BUTTON': _ts.to_json(show_details_toggle_button),
         'SHOW_MENU': _ts.to_json(show_menu),
         'SHOW_MENU_TOGGLE_BUTTON': _ts.to_json(show_menu_toggle_button),
+        'USE_DARK_MODE': _ts.to_json(use_dark_mode),
 
         'SHOW_NODE': _ts.to_json(show_node),
         'NODE_SIZE_FACTOR': _ts.to_json(node_size_factor),
