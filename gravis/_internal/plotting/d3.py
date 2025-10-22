@@ -34,7 +34,8 @@ def d3(data,
        collision_force_strength=0.7,
        use_x_positioning_force=False, x_positioning_force_strength=0.2,
        use_y_positioning_force=False, y_positioning_force_strength=0.2,
-       use_centering_force=True):
+       use_centering_force=True,
+       use_dark_mode=False):
     """Create an interactive graph visualization with HTML/CSS/JS based on d3.v7.js.
 
     Parameters
@@ -200,6 +201,8 @@ def d3(data,
         This force attracts each node towards the center of the coordinate system at (0, 0)
         to keep the graph in the display area. It may lead to unexpected repulsion effects
         if all nodes are fixed and then a single one is released by dragging it.
+    use_dark_mode : bool
+        If True, the interface is rendered with a dark theme instead of the default light theme.
 
     Returns
     -------
@@ -218,6 +221,7 @@ def d3(data,
     _ca(show_details_toggle_button, 'show_details_toggle_button', bool)
     _ca(show_menu, 'show_menu', bool)
     _ca(show_menu_toggle_button, 'show_menu_toggle_button', bool)
+    _ca(use_dark_mode, 'use_dark_mode', bool)
     _ca(show_node, 'show_node', bool)
     _ca(node_size_factor, 'node_size_factor', (int, float))
     _ca(node_size_data_source, 'node_size_data_source', str)
@@ -270,6 +274,7 @@ def d3(data,
     _ca(use_y_positioning_force, 'use_y_positioning_force', bool)
     _ca(y_positioning_force_strength, 'y_positioning_force_strength', (int, float))
     _ca(use_centering_force, 'use_centering_force', bool)
+    _ca(use_dark_mode, 'use_dark_mode', bool)
     data = _internal.normalize_graph_data(data)
 
     # Transformation
@@ -284,6 +289,7 @@ def d3(data,
         'SHOW_DETAILS_TOGGLE_BUTTON': _ts.to_json(show_details_toggle_button),
         'SHOW_MENU': _ts.to_json(show_menu),
         'SHOW_MENU_TOGGLE_BUTTON': _ts.to_json(show_menu_toggle_button),
+        'USE_DARK_MODE': _ts.to_json(use_dark_mode),
 
         'SHOW_NODE': _ts.to_json(show_node),
         'NODE_SIZE_FACTOR': _ts.to_json(node_size_factor),

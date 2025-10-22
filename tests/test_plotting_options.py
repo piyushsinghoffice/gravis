@@ -175,6 +175,7 @@ def test_plotting_with_each_keyword_argument(my_outdir):
         details_height=40,
         show_details=True,
         show_menu=False,
+        use_dark_mode=True,
         show_node=False,
         node_size_factor=2.0,
         node_size_data_source='label_size',
