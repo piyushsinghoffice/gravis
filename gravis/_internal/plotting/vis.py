@@ -26,7 +26,8 @@ def vis(data,
         zoom_factor=0.75, large_graph_threshold=500,
         layout_algorithm_active=True, layout_algorithm='barnesHut',
         gravitational_constant=-2000.0, central_gravity=0.1, spring_length=70.0,
-        spring_constant=0.1, avoid_overlap=0.0):
+        spring_constant=0.1, avoid_overlap=0.0,
+        use_dark_mode=False):
     """Create an interactive graph visualization with HTML/CSS/JS based on vis.js.
 
     Note
@@ -189,6 +190,8 @@ def vis(data,
         if they come too close together.
         Only active if layout_algorithm is "barnesHut", "forceAtlas2Based" or
         "hierarchicalRepulsion".
+    use_dark_mode : bool
+        If True, the interface is rendered with a dark theme instead of the default light theme.
 
     Returns
     -------
@@ -248,6 +251,7 @@ def vis(data,
     _ca(spring_length, 'spring_length', (int, float))
     _ca(spring_constant, 'spring_constant', (int, float))
     _ca(avoid_overlap, 'avoid_overlap', (int, float))
+    _ca(use_dark_mode, 'use_dark_mode', bool)
     data = _internal.normalize_graph_data(data)
 
     # Transformation
@@ -262,6 +266,7 @@ def vis(data,
         'SHOW_DETAILS_TOGGLE_BUTTON': _ts.to_json(show_details_toggle_button),
         'SHOW_MENU': _ts.to_json(show_menu),
         'SHOW_MENU_TOGGLE_BUTTON': _ts.to_json(show_menu_toggle_button),
+        'USE_DARK_MODE': _ts.to_json(use_dark_mode),
 
         'SHOW_NODE': _ts.to_json(show_node),
         'NODE_SIZE_FACTOR': _ts.to_json(node_size_factor),
