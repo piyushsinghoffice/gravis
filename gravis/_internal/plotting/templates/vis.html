@@ -1255,78 +1255,15 @@
               }
             },
 
-            resolveLegendEntries(obj, prop){
-              function pickLegendContainer(container){
-                if(!container || typeof(container) !== "object"){
-                  return undefined;
-                }
-                const legacyKeys = prop === "node_legend"
-                  ? ["node_legend", "nodeLegend", "node_entries", "nodeEntries"]
-                  : ["edge_legend", "edgeLegend", "edge_entries", "edgeEntries"];
-                for(let i=0; i<legacyKeys.length; i++){
-                  const key = legacyKeys[i];
-                  if(typeof(container[key]) !== "undefined"){
-                    return container[key];
-                  }
-                }
-                const legend = container.legend;
-                if(legend && typeof(legend) === "object"){
-                  const keys = prop === "node_legend"
-                    ? ["node_legend", "nodeLegend", "node_entries", "nodeEntries", "nodes", "node"]
-                    : ["edge_legend", "edgeLegend", "edge_entries", "edgeEntries", "edges", "edge"];
-                  for(let i=0; i<keys.length; i++){
-                    const key = keys[i];
-                    if(typeof(legend[key]) !== "undefined"){
-                      return legend[key];
-                    }
-                  }
-                }
-                return undefined;
-              }
-
-              const metadataCandidate = obj ? pickLegendContainer(obj.metadata) : undefined;
-              if(typeof(metadataCandidate) !== "undefined"){
-                return metadataCandidate;
-              }
-              const objectCandidate = pickLegendContainer(obj);
-              if(typeof(objectCandidate) !== "undefined"){
-                return objectCandidate;
-              }
-              return [];
-            },
-
             parseNodeLegendEntries(obj, general){
-              const raw = this.resolveLegendEntries(obj, "node_legend");
-              const entries = [];
-              if(Array.isArray(raw)){
-                for(let i=0; i<raw.length; i++){
-                  entries.push(raw[i]);
-                }
-              } else if(raw && typeof(raw) === "object"){
-                Object.keys(raw).forEach(function(label){
-                  const value = raw[label];
-                  if(value && typeof(value) === "object"){
-                    const copy = Object.assign({"label": label}, value);
-                    entries.push(copy);
-                  } else if(typeof(value) === "string" && value !== ""){
-                    entries.push({"label": label, "color": value});
-                  } else {
-                    entries.push({"label": label});
-                  }
-                });
-              }
+              const entries = this.getList(obj, "node_legend", []);
               const sanitized = [];
               for(let i=0; i<entries.length; i++){
                 const entry = entries[i];
-                let metadata;
-                if(typeof(entry) === "string"){
-                  metadata = {"label": entry};
-                } else if(typeof(entry) === "object" && entry !== null){
-                  metadata = Object.assign({}, entry);
-                } else {
+                if(typeof(entry) !== "object" || entry === null){
                   continue;
                 }
-                const wrapper = {"metadata": metadata};
+                const wrapper = {"metadata": entry};
                 const label = this.getString(wrapper, "label", "");
                 if(label === ""){
                   continue;
@@ -1349,44 +1286,21 @@
             },
 
             parseEdgeLegendEntries(obj, general){
-              const raw = this.resolveLegendEntries(obj, "edge_legend");
-              const entries = [];
-              if(Array.isArray(raw)){
-                for(let i=0; i<raw.length; i++){
-                  entries.push(raw[i]);
-                }
-              } else if(raw && typeof(raw) === "object"){
-                Object.keys(raw).forEach(function(label){
-                  const value = raw[label];
-                  if(value && typeof(value) === "object"){
-                    const copy = Object.assign({"label": label}, value);
-                    entries.push(copy);
-                  } else if(typeof(value) === "string" && value !== ""){
-                    entries.push({"label": label, "color": value});
-                  } else {
-                    entries.push({"label": label});
-                  }
-                });
-              }
+              const entries = this.getList(obj, "edge_legend", []);
               const sanitized = [];
               for(let i=0; i<entries.length; i++){
                 const entry = entries[i];
-                let metadata;
-                if(typeof(entry) === "string"){
-                  metadata = {"label": entry};
-                } else if(typeof(entry) === "object" && entry !== null){
-                  metadata = Object.assign({}, entry);
-                } else {
+                if(typeof(entry) !== "object" || entry === null){
                   continue;
                 }
-                const wrapper = {"metadata": metadata};
+                const wrapper = {"metadata": entry};
                 const label = this.getString(wrapper, "label", "");
                 if(label === ""){
                   continue;
                 }
                 let dashes = false;
                 try{
-                  let dashValue = metadata.dashes;
+                  let dashValue = entry.dashes;
                   if(dashValue === "true" || dashValue === "True"){
                     dashValue = true;
                   } else if(dashValue === "false" || dashValue === "False"){
