@@ -27,6 +27,7 @@ def vis(data,
         layout_algorithm_active=True, layout_algorithm='barnesHut',
         gravitational_constant=-2000.0, central_gravity=0.1, spring_length=70.0,
         spring_constant=0.1, avoid_overlap=0.0,
+        show_node_legend=True, show_edge_legend=True,
         use_dark_mode=False):
     """Create an interactive graph visualization with HTML/CSS/JS based on vis.js.
 
@@ -190,6 +191,14 @@ def vis(data,
         if they come too close together.
         Only active if layout_algorithm is "barnesHut", "forceAtlas2Based" or
         "hierarchicalRepulsion".
+    show_node_legend : bool
+        If True and legend entries are provided in the graph metadata under ``node_legend``,
+        a node legend panel is shown. Defaults to True so legends are displayed whenever
+        metadata supplies entries.
+    show_edge_legend : bool
+        If True and legend entries are provided in the graph metadata under ``edge_legend``,
+        an edge legend panel is shown. Defaults to True so legends are displayed whenever
+        metadata supplies entries.
     use_dark_mode : bool
         If True, the interface is rendered with a dark theme instead of the default light theme.
 
@@ -251,6 +260,8 @@ def vis(data,
     _ca(spring_length, 'spring_length', (int, float))
     _ca(spring_constant, 'spring_constant', (int, float))
     _ca(avoid_overlap, 'avoid_overlap', (int, float))
+    _ca(show_node_legend, 'show_node_legend', bool)
+    _ca(show_edge_legend, 'show_edge_legend', bool)
     _ca(use_dark_mode, 'use_dark_mode', bool)
     data = _internal.normalize_graph_data(data)
 
@@ -266,6 +277,8 @@ def vis(data,
         'SHOW_DETAILS_TOGGLE_BUTTON': _ts.to_json(show_details_toggle_button),
         'SHOW_MENU': _ts.to_json(show_menu),
         'SHOW_MENU_TOGGLE_BUTTON': _ts.to_json(show_menu_toggle_button),
+        'SHOW_NODE_LEGEND': _ts.to_json(show_node_legend),
+        'SHOW_EDGE_LEGEND': _ts.to_json(show_edge_legend),
         'USE_DARK_MODE': _ts.to_json(use_dark_mode),
 
         'SHOW_NODE': _ts.to_json(show_node),

@@ -34,6 +34,7 @@ def three(data,
           use_y_positioning_force=False, y_positioning_force_strength=0.2,
           use_z_positioning_force=False, z_positioning_force_strength=0.2,
           use_centering_force=True,
+          show_node_legend=True, show_edge_legend=True,
           use_dark_mode=False):
     """Create an interactive graph visualization with HTML/CSS/JS based on 3d-force-graph.js.
 
@@ -170,6 +171,14 @@ def three(data,
         Caution: This feature is currently ignored in this plot and only here for API consistency.
     edge_label_font : str
         Name of the font that is used for edge labels.
+    show_node_legend : bool
+        If True and legend entries are provided in the graph metadata under ``node_legend``,
+        a node legend panel is shown. Defaults to True so legends are displayed whenever
+        metadata supplies entries.
+    show_edge_legend : bool
+        If True and legend entries are provided in the graph metadata under ``edge_legend``,
+        an edge legend panel is shown. Defaults to True so legends are displayed whenever
+        metadata supplies entries.
     zoom_factor : int, float
         Factor that modifies how close the camera is to the drawing area on load.
         Caution: This feature is currently ignored in this plot and only here for API consistency.
@@ -310,6 +319,8 @@ def three(data,
     _ca(use_z_positioning_force, 'use_z_positioning_force', bool)
     _ca(z_positioning_force_strength, 'z_positioning_force_strength', (int, float))
     _ca(use_centering_force, 'use_centering_force', bool)
+    _ca(show_node_legend, 'show_node_legend', bool)
+    _ca(show_edge_legend, 'show_edge_legend', bool)
     _ca(use_dark_mode, 'use_dark_mode', bool)
     data = _internal.normalize_graph_data(data)
 
@@ -326,6 +337,8 @@ def three(data,
         'SHOW_DETAILS_TOGGLE_BUTTON': _ts.to_json(show_details_toggle_button),
         'SHOW_MENU': _ts.to_json(show_menu),
         'SHOW_MENU_TOGGLE_BUTTON': _ts.to_json(show_menu_toggle_button),
+        'SHOW_NODE_LEGEND': _ts.to_json(show_node_legend),
+        'SHOW_EDGE_LEGEND': _ts.to_json(show_edge_legend),
         'USE_DARK_MODE': _ts.to_json(use_dark_mode),
 
         'SHOW_NODE': _ts.to_json(show_node),

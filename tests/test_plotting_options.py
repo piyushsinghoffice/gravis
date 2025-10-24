@@ -7,6 +7,7 @@ import shared
 import gravis as gv
 
 
+@pytest.mark.skipif(shared.TESTDATA_NETWORKX is None, reason='missing optional dependency: NetworkX')
 def test_plotting_fig(my_outdir):
     data = shared.TESTDATA_NETWORKX['undirected']
     for func in [gv.d3, gv.vis, gv.three]:
