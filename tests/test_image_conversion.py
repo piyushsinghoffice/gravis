@@ -6,6 +6,7 @@ import shared
 import gravis as gv
 
 
+@pytest.mark.skipif(not shared.has_network_access(), reason='network access required')
 def test_url():
     # svg
     url = 'https://upload.wikimedia.org/wikipedia/commons/e/e4/Infobox_info_icon.svg'
