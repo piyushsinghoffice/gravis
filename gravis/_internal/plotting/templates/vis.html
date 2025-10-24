@@ -109,6 +109,68 @@
       line-height: normal;
       box-sizing: content-box;
     }
+    #§RANDOM_ID§-legend-container {
+      display: none;
+      margin-top: 5px;
+      padding: 8px 10px;
+      border: 1px solid var(--§RANDOM_ID§-border-color);
+      border-radius: 4px;
+      box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
+      background-color: var(--§RANDOM_ID§-surface-color-overlay);
+      line-height: normal;
+      box-sizing: content-box;
+    }
+    .§RANDOM_ID§-legend-section + .§RANDOM_ID§-legend-section {
+      margin-top: 8px;
+    }
+    .§RANDOM_ID§-legend-title {
+      font-size: 9px;
+      font-family: "Lucida Console", Monaco, monospace;
+      font-weight: 600;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      color: var(--§RANDOM_ID§-text-color);
+      margin-bottom: 4px;
+    }
+    .§RANDOM_ID§-legend-items {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+    }
+    .§RANDOM_ID§-legend-item {
+      display: flex;
+      align-items: center;
+      font-size: 9px;
+      font-family: "Lucida Console", Monaco, monospace;
+      color: var(--§RANDOM_ID§-text-color);
+      line-height: normal;
+      box-sizing: border-box;
+    }
+    .§RANDOM_ID§-legend-item[title] {
+      cursor: help;
+    }
+    .§RANDOM_ID§-legend-symbol {
+      width: 34px;
+      min-width: 34px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin-right: 6px;
+    }
+    .§RANDOM_ID§-legend-label {
+      flex: 1 1 auto;
+      word-break: break-word;
+      color: var(--§RANDOM_ID§-text-color);
+    }
+    .§RANDOM_ID§-legend-node-symbol,
+    .§RANDOM_ID§-legend-edge-symbol {
+      width: 100%;
+      height: 100%;
+    }
+    .§RANDOM_ID§-legend-edge-symbol {
+      max-width: 42px;
+      max-height: 14px;
+    }
 
     /* Control menu (contained in right-inner-div) */
     .§RANDOM_ID§-menu-item-head {
@@ -384,6 +446,16 @@
             Details for selected element
           </div>
           <div id="§RANDOM_ID§-details-body">
+          </div>
+        </div>
+        <div id="§RANDOM_ID§-legend-container">
+          <div id="§RANDOM_ID§-node-legend" class="§RANDOM_ID§-legend-section">
+            <div class="§RANDOM_ID§-legend-title">Node legend</div>
+            <div id="§RANDOM_ID§-node-legend-body" class="§RANDOM_ID§-legend-items"></div>
+          </div>
+          <div id="§RANDOM_ID§-edge-legend" class="§RANDOM_ID§-legend-section">
+            <div class="§RANDOM_ID§-legend-title">Edge legend</div>
+            <div id="§RANDOM_ID§-edge-legend-body" class="§RANDOM_ID§-legend-items"></div>
           </div>
         </div>
       </div>
@@ -977,6 +1049,8 @@
             state.showDetailsToggleButton = §SHOW_DETAILS_TOGGLE_BUTTON§,
             state.showMenu = §SHOW_MENU§,
             state.showMenuToggleButton = §SHOW_MENU_TOGGLE_BUTTON§,
+            state.showNodeLegend = §SHOW_NODE_LEGEND§,
+            state.showEdgeLegend = §SHOW_EDGE_LEGEND§,
             state.useDarkMode = §USE_DARK_MODE§,
             // Nodes
             state.showNodes = §SHOW_NODE§;
@@ -1168,6 +1242,176 @@
                 }
               }
             },
+
+            getList(obj, prop, def){
+              try{
+                const value = obj.metadata[prop];
+                if(!Array.isArray(value)){
+                  throw "Invalid value. Not a list.";
+                }
+                return value;
+              } catch(e){
+                return def;
+              }
+            },
+
+            resolveLegendEntries(obj, prop){
+              function pickLegendContainer(container){
+                if(!container || typeof(container) !== "object"){
+                  return undefined;
+                }
+                const legacyKeys = prop === "node_legend"
+                  ? ["node_legend", "nodeLegend", "node_entries", "nodeEntries"]
+                  : ["edge_legend", "edgeLegend", "edge_entries", "edgeEntries"];
+                for(let i=0; i<legacyKeys.length; i++){
+                  const key = legacyKeys[i];
+                  if(typeof(container[key]) !== "undefined"){
+                    return container[key];
+                  }
+                }
+                const legend = container.legend;
+                if(legend && typeof(legend) === "object"){
+                  const keys = prop === "node_legend"
+                    ? ["node_legend", "nodeLegend", "node_entries", "nodeEntries", "nodes", "node"]
+                    : ["edge_legend", "edgeLegend", "edge_entries", "edgeEntries", "edges", "edge"];
+                  for(let i=0; i<keys.length; i++){
+                    const key = keys[i];
+                    if(typeof(legend[key]) !== "undefined"){
+                      return legend[key];
+                    }
+                  }
+                }
+                return undefined;
+              }
+
+              const metadataCandidate = obj ? pickLegendContainer(obj.metadata) : undefined;
+              if(typeof(metadataCandidate) !== "undefined"){
+                return metadataCandidate;
+              }
+              const objectCandidate = pickLegendContainer(obj);
+              if(typeof(objectCandidate) !== "undefined"){
+                return objectCandidate;
+              }
+              return [];
+            },
+
+            parseNodeLegendEntries(obj, general){
+              const raw = this.resolveLegendEntries(obj, "node_legend");
+              const entries = [];
+              if(Array.isArray(raw)){
+                for(let i=0; i<raw.length; i++){
+                  entries.push(raw[i]);
+                }
+              } else if(raw && typeof(raw) === "object"){
+                Object.keys(raw).forEach(function(label){
+                  const value = raw[label];
+                  if(value && typeof(value) === "object"){
+                    const copy = Object.assign({"label": label}, value);
+                    entries.push(copy);
+                  } else if(typeof(value) === "string" && value !== ""){
+                    entries.push({"label": label, "color": value});
+                  } else {
+                    entries.push({"label": label});
+                  }
+                });
+              }
+              const sanitized = [];
+              for(let i=0; i<entries.length; i++){
+                const entry = entries[i];
+                let metadata;
+                if(typeof(entry) === "string"){
+                  metadata = {"label": entry};
+                } else if(typeof(entry) === "object" && entry !== null){
+                  metadata = Object.assign({}, entry);
+                } else {
+                  continue;
+                }
+                const wrapper = {"metadata": metadata};
+                const label = this.getString(wrapper, "label", "");
+                if(label === ""){
+                  continue;
+                }
+                const legendEntry = {
+                  "label": label,
+                  "color": this.getColor(wrapper, "color", general.node_color),
+                  "border_color": this.getColor(wrapper, "border_color", general.node_border_color),
+                  "border_size": this.getFinitePositiveNumber(wrapper, "border_size", general.node_border_size),
+                  "shape": this.getShape(wrapper, "shape", general.node_shape),
+                  "size": this.getFinitePositiveNumber(wrapper, "size", general.node_size),
+                };
+                const description = this.getString(wrapper, "description", "");
+                if(description !== ""){
+                  legendEntry.description = description;
+                }
+                sanitized.push(legendEntry);
+              }
+              return sanitized;
+            },
+
+            parseEdgeLegendEntries(obj, general){
+              const raw = this.resolveLegendEntries(obj, "edge_legend");
+              const entries = [];
+              if(Array.isArray(raw)){
+                for(let i=0; i<raw.length; i++){
+                  entries.push(raw[i]);
+                }
+              } else if(raw && typeof(raw) === "object"){
+                Object.keys(raw).forEach(function(label){
+                  const value = raw[label];
+                  if(value && typeof(value) === "object"){
+                    const copy = Object.assign({"label": label}, value);
+                    entries.push(copy);
+                  } else if(typeof(value) === "string" && value !== ""){
+                    entries.push({"label": label, "color": value});
+                  } else {
+                    entries.push({"label": label});
+                  }
+                });
+              }
+              const sanitized = [];
+              for(let i=0; i<entries.length; i++){
+                const entry = entries[i];
+                let metadata;
+                if(typeof(entry) === "string"){
+                  metadata = {"label": entry};
+                } else if(typeof(entry) === "object" && entry !== null){
+                  metadata = Object.assign({}, entry);
+                } else {
+                  continue;
+                }
+                const wrapper = {"metadata": metadata};
+                const label = this.getString(wrapper, "label", "");
+                if(label === ""){
+                  continue;
+                }
+                let dashes = false;
+                try{
+                  let dashValue = metadata.dashes;
+                  if(dashValue === "true" || dashValue === "True"){
+                    dashValue = true;
+                  } else if(dashValue === "false" || dashValue === "False"){
+                    dashValue = false;
+                  }
+                  if(dashValue === true || dashValue === false){
+                    dashes = dashValue;
+                  }
+                } catch(e){
+                  dashes = false;
+                }
+                const legendEntry = {
+                  "label": label,
+                  "color": this.getColor(wrapper, "color", general.edge_color),
+                  "size": this.getFinitePositiveNumber(wrapper, "size", general.edge_size),
+                  "dashes": dashes,
+                };
+                const description = this.getString(wrapper, "description", "");
+                if(description !== ""){
+                  legendEntry.description = description;
+                }
+                sanitized.push(legendEntry);
+              }
+              return sanitized;
+            },
           },
 
           propertyClassifier:{
@@ -1264,10 +1508,17 @@
               edge_click: state.manager.rawMetadataParser.getString(givenData, "edge_click", ""),
               contains_edge_hover: false,
               contains_edge_click: false,
+              // Legend
+              node_legend: [],
+              edge_legend: [],
             };
             if(!parsedData.general.directed){
               parsedData.general.arrow_size = 0.0;
             }
+            parsedData.general.node_legend = state.manager.rawMetadataParser.parseNodeLegendEntries(
+              givenData, parsedData.general);
+            parsedData.general.edge_legend = state.manager.rawMetadataParser.parseEdgeLegendEntries(
+              givenData, parsedData.general);
           },
 
           parseNodes(givenData, parsedData){
@@ -1590,6 +1841,12 @@
               "arrow_color": state.parsedData.general.arrow_color,
               "directed": state.parsedData.general.directed,
             };
+            state.shownData.general.node_legend = state.parsedData.general.node_legend.map(function(entry){
+              return Object.assign({}, entry);
+            });
+            state.shownData.general.edge_legend = state.parsedData.general.edge_legend.map(function(entry){
+              return Object.assign({}, entry);
+            });
             // b) Nodes
             for(let i=0; i<numNodes; i++){
               state.shownData.nodes[i] = {};
@@ -1871,6 +2128,11 @@
           detailsContainer: document.getElementById("§RANDOM_ID§-details-div"),
           detailsHead: document.getElementById("§RANDOM_ID§-details-head"),
           detailsBody: document.getElementById("§RANDOM_ID§-details-body"),
+          legendContainer: document.getElementById("§RANDOM_ID§-legend-container"),
+          nodeLegendSection: document.getElementById("§RANDOM_ID§-node-legend"),
+          nodeLegendBody: document.getElementById("§RANDOM_ID§-node-legend-body"),
+          edgeLegendSection: document.getElementById("§RANDOM_ID§-edge-legend"),
+          edgeLegendBody: document.getElementById("§RANDOM_ID§-edge-legend-body"),
           // Data sources
           dataHead: document.getElementById("§RANDOM_ID§-data-head"),
           dataBody: document.getElementById("§RANDOM_ID§-data-body"),
@@ -1981,6 +2243,7 @@
               } else{
                 ui.composites.details.hide(true);
               }
+              ui.composites.legend.update();
               // Divs
               ui.composites.responsiveContainer.setInnerHeights();
               ui.composites.responsiveContainer.setOuterHeights();
@@ -2180,6 +2443,312 @@
                 toggleDiv.innerHTML = ui.symbols.detailsHidden;
                 ui.composites.details.hide();
               }
+            },
+          },
+
+          legend:{
+            svgNamespace: "http://www.w3.org/2000/svg",
+
+            update(){
+              const nodeEntries = Array.isArray(state.shownData.general.node_legend)
+                ? state.shownData.general.node_legend : [];
+              const edgeEntries = Array.isArray(state.shownData.general.edge_legend)
+                ? state.shownData.general.edge_legend : [];
+              const showNode = Boolean(state.showNodeLegend && nodeEntries.length > 0);
+              const showEdge = Boolean(state.showEdgeLegend && edgeEntries.length > 0);
+
+              ui.elements.legendContainer.style.display = ui.convert.boolToDisplayStyle(showNode || showEdge);
+
+              if(showNode){
+                ui.elements.nodeLegendSection.style.display = "block";
+                this.renderNodeLegend(nodeEntries);
+              } else {
+                ui.elements.nodeLegendSection.style.display = "none";
+                ui.deleteChildElements(ui.elements.nodeLegendBody);
+              }
+
+              if(showEdge){
+                ui.elements.edgeLegendSection.style.display = "block";
+                this.renderEdgeLegend(edgeEntries);
+              } else {
+                ui.elements.edgeLegendSection.style.display = "none";
+                ui.deleteChildElements(ui.elements.edgeLegendBody);
+              }
+            },
+
+            renderNodeLegend(entries){
+              const body = ui.elements.nodeLegendBody;
+              ui.deleteChildElements(body);
+              const legend = this;
+              entries.forEach(function(entry){
+                const symbol = legend.createNodeSymbol(entry);
+                legend.appendLegendItem(body, symbol, entry.label, entry.description);
+              });
+            },
+
+            renderEdgeLegend(entries){
+              const body = ui.elements.edgeLegendBody;
+              ui.deleteChildElements(body);
+              const legend = this;
+              entries.forEach(function(entry){
+                const symbol = legend.createEdgeSymbol(entry);
+                legend.appendLegendItem(body, symbol, entry.label, entry.description);
+              });
+            },
+
+            appendLegendItem(container, symbol, label, description){
+              const item = document.createElement("div");
+              item.className = "§RANDOM_ID§-legend-item";
+              if(typeof(description) === "string" && description !== ""){
+                item.title = description;
+              }
+              const symbolWrapper = document.createElement("div");
+              symbolWrapper.className = "§RANDOM_ID§-legend-symbol";
+              if(symbol){
+                symbolWrapper.appendChild(symbol);
+              }
+              const labelElement = document.createElement("div");
+              labelElement.className = "§RANDOM_ID§-legend-label";
+              labelElement.innerText = String(label);
+              item.appendChild(symbolWrapper);
+              item.appendChild(labelElement);
+              container.appendChild(item);
+            },
+
+            createNodeSymbol(entry){
+              const svg = document.createElementNS(this.svgNamespace, "svg");
+              svg.setAttribute("viewBox", "0 0 28 28");
+              svg.setAttribute("class", "§RANDOM_ID§-legend-node-symbol");
+
+              const shape = this.normalizeNodeShape(entry.shape);
+              const fillColor = entry.color || state.parsedData.general.node_color;
+              const strokeColor = entry.border_color || state.parsedData.general.node_border_color;
+              const baseSize = 10.0;
+              const scale = this.clampNumber(this.coerceNumber(entry.size, baseSize) / baseSize, 0.4, 1.6);
+              const strokeWidth = this.clampNumber(this.coerceNumber(entry.border_size, 0.0), 0.0, 5.0);
+
+              let element;
+              if(shape === "square"){
+                element = this.createSquareShape(scale, strokeWidth);
+              } else if(shape === "triangle"){
+                element = this.createTriangleShape(scale, strokeWidth, false);
+              } else if(shape === "triangledown"){
+                element = this.createTriangleShape(scale, strokeWidth, true);
+              } else if(shape === "diamond"){
+                element = this.createDiamondShape(scale, strokeWidth);
+              } else if(shape === "hexagon"){
+                element = this.createHexagonShape(scale, strokeWidth);
+              } else if(shape === "star"){
+                element = this.createStarShape(scale, strokeWidth);
+              } else {
+                element = this.createCircleShape(scale, strokeWidth);
+              }
+
+              element.setAttribute("fill", fillColor);
+              if(strokeWidth > 0.0){
+                element.setAttribute("stroke", strokeColor);
+                element.setAttribute("stroke-width", String(strokeWidth));
+                element.setAttribute("stroke-linejoin", "round");
+              } else {
+                element.setAttribute("stroke", "none");
+              }
+              svg.appendChild(element);
+              return svg;
+            },
+
+            createEdgeSymbol(entry){
+              const svg = document.createElementNS(this.svgNamespace, "svg");
+              svg.setAttribute("viewBox", "0 0 48 16");
+              svg.setAttribute("class", "§RANDOM_ID§-legend-edge-symbol");
+
+              const color = entry.color || state.parsedData.general.edge_color;
+              const strokeWidth = this.clampNumber(
+                this.coerceNumber(entry.size, state.parsedData.general.edge_size), 0.5, 6.0);
+              const padding = 5;
+              let lineEnd = 48 - padding;
+              let arrowSize = 0.0;
+              if(state.parsedData.general.directed){
+                arrowSize = this.clampNumber(4 + strokeWidth * 1.2, 6.0, 12.0);
+                lineEnd -= arrowSize;
+              }
+
+              const line = document.createElementNS(this.svgNamespace, "line");
+              line.setAttribute("x1", String(padding));
+              line.setAttribute("y1", "8");
+              line.setAttribute("x2", String(lineEnd));
+              line.setAttribute("y2", "8");
+              line.setAttribute("stroke", color);
+              line.setAttribute("stroke-width", String(strokeWidth));
+              line.setAttribute("stroke-linecap", "round");
+              if(entry.dashes){
+                line.setAttribute("stroke-dasharray", "6,4");
+              }
+              svg.appendChild(line);
+
+              if(state.parsedData.general.directed){
+                const arrow = document.createElementNS(this.svgNamespace, "polygon");
+                const endX = 48 - padding;
+                const points = [
+                  [endX, 8],
+                  [lineEnd, 8 - arrowSize / 2],
+                  [lineEnd, 8 + arrowSize / 2],
+                ];
+                arrow.setAttribute("points", this.pointsToString(points));
+                arrow.setAttribute("fill", color);
+                svg.appendChild(arrow);
+              }
+
+              return svg;
+            },
+
+            normalizeNodeShape(shape){
+              const value = String(shape || "dot").toLowerCase();
+              if(value === "square" || value === "box" || value === "rectangle"){
+                return "square";
+              }
+              if(value === "triangle" || value === "triangleup"){
+                return "triangle";
+              }
+              if(value === "triangledown"){
+                return "triangledown";
+              }
+              if(value === "diamond"){
+                return "diamond";
+              }
+              if(value === "star"){
+                return "star";
+              }
+              if(value === "hexagon"){
+                return "hexagon";
+              }
+              return "dot";
+            },
+
+            createCircleShape(scale, strokeWidth){
+              const element = document.createElementNS(this.svgNamespace, "circle");
+              const baseRadius = 8.2;
+              const radius = this.clampNumber(baseRadius * scale, 3.0, 12.5) - strokeWidth / 2.0;
+              element.setAttribute("cx", "14");
+              element.setAttribute("cy", "14");
+              element.setAttribute("r", String(Math.max(1.5, radius)));
+              return element;
+            },
+
+            createSquareShape(scale, strokeWidth){
+              const element = document.createElementNS(this.svgNamespace, "rect");
+              const baseSize = 14.0;
+              const size = this.clampNumber(baseSize * scale, 6.0, 24.0) - strokeWidth;
+              const clampedSize = Math.max(4.0, size);
+              const offset = 14 - clampedSize / 2.0;
+              element.setAttribute("x", String(offset));
+              element.setAttribute("y", String(offset));
+              element.setAttribute("width", String(clampedSize));
+              element.setAttribute("height", String(clampedSize));
+              element.setAttribute("rx", "2");
+              element.setAttribute("ry", "2");
+              return element;
+            },
+
+            createTriangleShape(scale, strokeWidth, inverted){
+              const element = document.createElementNS(this.svgNamespace, "polygon");
+              const baseHeight = 9.8;
+              const height = this.clampNumber(baseHeight * scale, 5.0, 12.5) - strokeWidth / 2.5;
+              const halfWidth = this.clampNumber(height * 1.1, 5.0, 12.0);
+              const topY = 14 - height;
+              const bottomY = 14 + height;
+              let points;
+              if(inverted){
+                points = [
+                  [14, bottomY],
+                  [14 - halfWidth, topY],
+                  [14 + halfWidth, topY],
+                ];
+              } else {
+                points = [
+                  [14, topY],
+                  [14 + halfWidth, bottomY],
+                  [14 - halfWidth, bottomY],
+                ];
+              }
+              element.setAttribute("points", this.pointsToString(points));
+              return element;
+            },
+
+            createDiamondShape(scale, strokeWidth){
+              const element = document.createElementNS(this.svgNamespace, "polygon");
+              const baseRadius = 9.5;
+              const radius = this.clampNumber(baseRadius * scale, 5.0, 12.0) - strokeWidth / 2.0;
+              const points = [
+                [14, 14 - radius],
+                [14 + radius, 14],
+                [14, 14 + radius],
+                [14 - radius, 14],
+              ];
+              element.setAttribute("points", this.pointsToString(points));
+              return element;
+            },
+
+            createHexagonShape(scale, strokeWidth){
+              const element = document.createElementNS(this.svgNamespace, "polygon");
+              const baseRadius = 8.5;
+              const radius = this.clampNumber(baseRadius * scale, 4.5, 11.5) - strokeWidth / 2.5;
+              const horizontal = radius * Math.cos(Math.PI / 6);
+              const verticalOffset = radius / 2;
+              const points = [
+                [14, 14 - radius],
+                [14 + horizontal, 14 - verticalOffset],
+                [14 + horizontal, 14 + verticalOffset],
+                [14, 14 + radius],
+                [14 - horizontal, 14 + verticalOffset],
+                [14 - horizontal, 14 - verticalOffset],
+              ];
+              element.setAttribute("points", this.pointsToString(points));
+              return element;
+            },
+
+            createStarShape(scale, strokeWidth){
+              const element = document.createElementNS(this.svgNamespace, "polygon");
+              const outer = this.clampNumber(9.0 * scale, 5.0, 11.5) - strokeWidth / 2.5;
+              const inner = outer * 0.5;
+              const points = [];
+              for(let i=0; i<5; i++){
+                const angle = -Math.PI / 2 + i * (2 * Math.PI / 5);
+                const outerX = 14 + Math.cos(angle) * outer;
+                const outerY = 14 + Math.sin(angle) * outer;
+                points.push([outerX, outerY]);
+                const innerAngle = angle + Math.PI / 5;
+                const innerX = 14 + Math.cos(innerAngle) * inner;
+                const innerY = 14 + Math.sin(innerAngle) * inner;
+                points.push([innerX, innerY]);
+              }
+              element.setAttribute("points", this.pointsToString(points));
+              return element;
+            },
+
+            coerceNumber(value, fallback){
+              const parsed = parseFloat(value);
+              if(!isFinite(parsed)){
+                return fallback;
+              }
+              return parsed;
+            },
+
+            clampNumber(value, min, max){
+              if(value < min){
+                return min;
+              }
+              if(value > max){
+                return max;
+              }
+              return value;
+            },
+
+            pointsToString(points){
+              return points.map(function(point){
+                return point.map(function(num){
+                  return Number(num).toFixed(2);
+                }).join(" ");
+              }).join(" ");
             },
           },
 
@@ -3245,6 +3814,8 @@
             const chosenGraphIndex = parseInt(this.value);
             state.manager.parseChosenData(chosenGraphIndex);
             state.manager.prepareShownData();
+            ui.composites.legend.update();
+            ui.composites.responsiveContainer.setOuterHeights();
             ui.initSelectionValues();
             ui.composites.graph.createGraph();
           };

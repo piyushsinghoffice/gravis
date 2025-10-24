@@ -56,6 +56,7 @@ def test_input_single_gjgf_from_file(my_outdir):
     shared.export_all_available_formats(fig, filepath)
 
 
+@pytest.mark.skipif(shared.TESTDATA_NETWORKX is None, reason='missing optional dependency: NetworkX')
 def test_input_single_graph(my_outdir):
     data = shared.TESTDATA_NETWORKX['undirected']
     fig = gv.d3(data)

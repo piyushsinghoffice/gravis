@@ -35,6 +35,7 @@ def d3(data,
        use_x_positioning_force=False, x_positioning_force_strength=0.2,
        use_y_positioning_force=False, y_positioning_force_strength=0.2,
        use_centering_force=True,
+       show_node_legend=False, show_edge_legend=False,
        use_dark_mode=False):
     """Create an interactive graph visualization with HTML/CSS/JS based on d3.v7.js.
 
@@ -139,6 +140,12 @@ def d3(data,
         An angle that modifies edge label orientation.
     edge_label_font : str
         Name of the font that is used for edge labels.
+    show_node_legend : bool
+        If True and legend entries are provided in the graph metadata under ``node_legend``,
+        a node legend panel is shown.
+    show_edge_legend : bool
+        If True and legend entries are provided in the graph metadata under ``edge_legend``,
+        an edge legend panel is shown.
     zoom_factor : int, float
         Factor that modifies how close the camera is to the drawing area on load.
     large_graph_threshold : int, float
@@ -274,6 +281,8 @@ def d3(data,
     _ca(use_y_positioning_force, 'use_y_positioning_force', bool)
     _ca(y_positioning_force_strength, 'y_positioning_force_strength', (int, float))
     _ca(use_centering_force, 'use_centering_force', bool)
+    _ca(show_node_legend, 'show_node_legend', bool)
+    _ca(show_edge_legend, 'show_edge_legend', bool)
     _ca(use_dark_mode, 'use_dark_mode', bool)
     data = _internal.normalize_graph_data(data)
 
@@ -289,6 +298,8 @@ def d3(data,
         'SHOW_DETAILS_TOGGLE_BUTTON': _ts.to_json(show_details_toggle_button),
         'SHOW_MENU': _ts.to_json(show_menu),
         'SHOW_MENU_TOGGLE_BUTTON': _ts.to_json(show_menu_toggle_button),
+        'SHOW_NODE_LEGEND': _ts.to_json(show_node_legend),
+        'SHOW_EDGE_LEGEND': _ts.to_json(show_edge_legend),
         'USE_DARK_MODE': _ts.to_json(use_dark_mode),
 
         'SHOW_NODE': _ts.to_json(show_node),
