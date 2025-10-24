@@ -111,64 +111,14 @@
     }
     #§RANDOM_ID§-legend-container {
       display: none;
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      max-width: min(320px, 45%);
-      max-height: 60%;
-      overflow-y: auto;
+      margin-top: 5px;
       padding: 8px 10px;
       border: 1px solid var(--§RANDOM_ID§-border-color);
       border-radius: 4px;
-      box-shadow: 0px 0px 6px rgba(0, 0, 0, 0.25);
+      box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.2);
       background-color: var(--§RANDOM_ID§-surface-color-overlay);
       line-height: normal;
-      box-sizing: border-box;
-      pointer-events: auto;
-      z-index: 5;
-      transition: opacity 120ms ease-in-out, transform 120ms ease-in-out;
-    }
-    #§RANDOM_ID§-legend-container.§RANDOM_ID§-legend-top-left {
-      top: 10px;
-      right: auto;
-      bottom: auto;
-      left: 10px;
-      transform: none;
-    }
-    #§RANDOM_ID§-legend-container.§RANDOM_ID§-legend-top-right {
-      top: 10px;
-      right: 10px;
-      bottom: auto;
-      left: auto;
-      transform: none;
-    }
-    #§RANDOM_ID§-legend-container.§RANDOM_ID§-legend-bottom-left {
-      top: auto;
-      right: auto;
-      bottom: 10px;
-      left: 10px;
-      transform: none;
-    }
-    #§RANDOM_ID§-legend-container.§RANDOM_ID§-legend-bottom-right {
-      top: auto;
-      right: 10px;
-      bottom: 10px;
-      left: auto;
-      transform: none;
-    }
-    #§RANDOM_ID§-legend-container.§RANDOM_ID§-legend-left {
-      top: 50%;
-      right: auto;
-      bottom: auto;
-      left: 10px;
-      transform: translateY(-50%);
-    }
-    #§RANDOM_ID§-legend-container.§RANDOM_ID§-legend-right {
-      top: 50%;
-      right: 10px;
-      bottom: auto;
-      left: auto;
-      transform: translateY(-50%);
+      box-sizing: content-box;
     }
     .§RANDOM_ID§-legend-section + .§RANDOM_ID§-legend-section {
       margin-top: 8px;
@@ -507,6 +457,16 @@
             Details for selected element
           </div>
           <div id="§RANDOM_ID§-details-body">
+          </div>
+        </div>
+        <div id="§RANDOM_ID§-legend-container">
+          <div id="§RANDOM_ID§-node-legend" class="§RANDOM_ID§-legend-section">
+            <div class="§RANDOM_ID§-legend-title">Node legend</div>
+            <div id="§RANDOM_ID§-node-legend-body" class="§RANDOM_ID§-legend-items"></div>
+          </div>
+          <div id="§RANDOM_ID§-edge-legend" class="§RANDOM_ID§-legend-section">
+            <div class="§RANDOM_ID§-legend-title">Edge legend</div>
+            <div id="§RANDOM_ID§-edge-legend-body" class="§RANDOM_ID§-legend-items"></div>
           </div>
         </div>
       </div>
@@ -1306,134 +1266,15 @@
               }
             },
 
-            resolveLegendContainer(obj){
-              const legendKeys = [
-                "node_legend", "nodeLegend", "node_entries", "nodeEntries",
-                "edge_legend", "edgeLegend", "edge_entries", "edgeEntries",
-              ];
-              function pick(container){
-                if(!container || typeof(container) !== "object"){
-                  return undefined;
-                }
-                if(container.legend && typeof(container.legend) === "object"){
-                  return container.legend;
-                }
-                for(let i=0; i<legendKeys.length; i++){
-                  if(typeof(container[legendKeys[i]]) !== "undefined"){
-                    return container;
-                  }
-                }
-                return undefined;
-              }
-              if(!obj){
-                return undefined;
-              }
-              const metadataCandidate = pick(obj.metadata);
-              if(typeof(metadataCandidate) !== "undefined"){
-                return metadataCandidate;
-              }
-              return pick(obj);
-            },
-
-            resolveLegendEntries(obj, prop){
-              const container = this.resolveLegendContainer(obj);
-              if(!container){
-                return [];
-              }
-              const keys = prop === "node_legend"
-                ? ["node_legend", "nodeLegend", "node_entries", "nodeEntries", "nodes", "node"]
-                : ["edge_legend", "edgeLegend", "edge_entries", "edgeEntries", "edges", "edge"];
-              for(let i=0; i<keys.length; i++){
-                const key = keys[i];
-                if(typeof(container[key]) !== "undefined"){
-                  return container[key];
-                }
-              }
-              return [];
-            },
-
-            parseLegendSettings(obj, defaults){
-              const base = Object.assign({
-                enabled: true,
-                draggable: false,
-                collapsible: false,
-                position: "top-right",
-                background_color: null,
-                border_color: null,
-                opacity: null,
-              }, defaults || {});
-              const container = this.resolveLegendContainer(obj);
-              if(!container){
-                return base;
-              }
-              const wrapper = {"metadata": container};
-              const enabled = this.getBool(wrapper, "enabled", base.enabled);
-              const draggable = this.getBool(wrapper, "draggable", base.draggable);
-              const collapsible = this.getBool(wrapper, "collapsible", base.collapsible);
-              const rawPosition = this.getString(wrapper, "position", base.position);
-              const normalizedPosition = (function(){
-                if(typeof(rawPosition) !== "string"){
-                  return base.position;
-                }
-                let value = rawPosition.replace(/([a-z])([A-Z])/g, "$1-$2");
-                value = value.replace(/_/g, "-");
-                value = value.toLowerCase();
-                const allowed = [
-                  "top-left", "top-right", "bottom-left",
-                  "bottom-right", "left", "right",
-                ];
-                return allowed.indexOf(value) !== -1 ? value : base.position;
-              })();
-              const backgroundColor = this.getColor(wrapper, "background_color", base.background_color);
-              const borderColor = this.getColor(wrapper, "border_color", base.border_color);
-              const rawOpacity = this.getFiniteNumber(wrapper, "opacity", base.opacity);
-              let opacity = base.opacity;
-              if(typeof(rawOpacity) === "number" && isFinite(rawOpacity)){
-                opacity = Math.min(1, Math.max(0, rawOpacity));
-              }
-              return {
-                enabled: enabled,
-                draggable: draggable,
-                collapsible: collapsible,
-                position: normalizedPosition,
-                background_color: backgroundColor,
-                border_color: borderColor,
-                opacity: opacity,
-              };
-            },
-
             parseNodeLegendEntries(obj, general){
-              const raw = this.resolveLegendEntries(obj, "node_legend");
-              const entries = [];
-              if(Array.isArray(raw)){
-                for(let i=0; i<raw.length; i++){
-                  entries.push(raw[i]);
-                }
-              } else if(raw && typeof(raw) === "object"){
-                Object.keys(raw).forEach(function(label){
-                  const value = raw[label];
-                  if(value && typeof(value) === "object"){
-                    const copy = Object.assign({"label": label}, value);
-                    entries.push(copy);
-                  } else if(typeof(value) === "string" && value !== ""){
-                    entries.push({"label": label, "color": value});
-                  } else {
-                    entries.push({"label": label});
-                  }
-                });
-              }
+              const entries = this.getList(obj, "node_legend", []);
               const sanitized = [];
               for(let i=0; i<entries.length; i++){
                 const entry = entries[i];
-                let metadata;
-                if(typeof(entry) === "string"){
-                  metadata = {"label": entry};
-                } else if(typeof(entry) === "object" && entry !== null){
-                  metadata = Object.assign({}, entry);
-                } else {
+                if(typeof(entry) !== "object" || entry === null){
                   continue;
                 }
-                const wrapper = {"metadata": metadata};
+                const wrapper = {"metadata": entry};
                 const label = this.getString(wrapper, "label", "");
                 if(label === ""){
                   continue;
@@ -1456,44 +1297,21 @@
             },
 
             parseEdgeLegendEntries(obj, general){
-              const raw = this.resolveLegendEntries(obj, "edge_legend");
-              const entries = [];
-              if(Array.isArray(raw)){
-                for(let i=0; i<raw.length; i++){
-                  entries.push(raw[i]);
-                }
-              } else if(raw && typeof(raw) === "object"){
-                Object.keys(raw).forEach(function(label){
-                  const value = raw[label];
-                  if(value && typeof(value) === "object"){
-                    const copy = Object.assign({"label": label}, value);
-                    entries.push(copy);
-                  } else if(typeof(value) === "string" && value !== ""){
-                    entries.push({"label": label, "color": value});
-                  } else {
-                    entries.push({"label": label});
-                  }
-                });
-              }
+              const entries = this.getList(obj, "edge_legend", []);
               const sanitized = [];
               for(let i=0; i<entries.length; i++){
                 const entry = entries[i];
-                let metadata;
-                if(typeof(entry) === "string"){
-                  metadata = {"label": entry};
-                } else if(typeof(entry) === "object" && entry !== null){
-                  metadata = Object.assign({}, entry);
-                } else {
+                if(typeof(entry) !== "object" || entry === null){
                   continue;
                 }
-                const wrapper = {"metadata": metadata};
+                const wrapper = {"metadata": entry};
                 const label = this.getString(wrapper, "label", "");
                 if(label === ""){
                   continue;
                 }
                 let dashes = false;
                 try{
-                  let dashValue = metadata.dashes;
+                  let dashValue = entry.dashes;
                   if(dashValue === "true" || dashValue === "True"){
                     dashValue = true;
                   } else if(dashValue === "false" || dashValue === "False"){
@@ -1618,13 +1436,6 @@
               // Legend
               node_legend: [],
               edge_legend: [],
-              legend_enabled: true,
-              legend_position: "top-right",
-              legend_background_color: null,
-              legend_border_color: null,
-              legend_opacity: null,
-              legend_draggable: false,
-              legend_collapsible: false,
             };
             if(!parsedData.general.directed){
               parsedData.general.arrow_size = 0.0;
@@ -1633,25 +1444,6 @@
               givenData, parsedData.general);
             parsedData.general.edge_legend = state.manager.rawMetadataParser.parseEdgeLegendEntries(
               givenData, parsedData.general);
-            const legendSettings = state.manager.rawMetadataParser.parseLegendSettings(
-              givenData,
-              {
-                enabled: parsedData.general.legend_enabled,
-                position: parsedData.general.legend_position,
-                background_color: parsedData.general.legend_background_color,
-                border_color: parsedData.general.legend_border_color,
-                opacity: parsedData.general.legend_opacity,
-                draggable: parsedData.general.legend_draggable,
-                collapsible: parsedData.general.legend_collapsible,
-              }
-            );
-            parsedData.general.legend_enabled = legendSettings.enabled;
-            parsedData.general.legend_position = legendSettings.position;
-            parsedData.general.legend_background_color = legendSettings.background_color;
-            parsedData.general.legend_border_color = legendSettings.border_color;
-            parsedData.general.legend_opacity = legendSettings.opacity;
-            parsedData.general.legend_draggable = legendSettings.draggable;
-            parsedData.general.legend_collapsible = legendSettings.collapsible;
           },
 
           parseNodes(givenData, parsedData){
@@ -2588,23 +2380,6 @@
 
           legend:{
             svgNamespace: "http://www.w3.org/2000/svg",
-            defaultPosition: "top-right",
-            positionClassMap: {
-              "top-left": "§RANDOM_ID§-legend-top-left",
-              "top-right": "§RANDOM_ID§-legend-top-right",
-              "bottom-left": "§RANDOM_ID§-legend-bottom-left",
-              "bottom-right": "§RANDOM_ID§-legend-bottom-right",
-              "left": "§RANDOM_ID§-legend-left",
-              "right": "§RANDOM_ID§-legend-right",
-            },
-            positionClasses: [
-              "§RANDOM_ID§-legend-top-left",
-              "§RANDOM_ID§-legend-top-right",
-              "§RANDOM_ID§-legend-bottom-left",
-              "§RANDOM_ID§-legend-bottom-right",
-              "§RANDOM_ID§-legend-left",
-              "§RANDOM_ID§-legend-right",
-            ],
 
             update(){
               const nodeEntries = Array.isArray(state.shownData.general.node_legend)
@@ -2614,19 +2389,9 @@
               const showNode = Boolean(state.showNodeLegend && nodeEntries.length > 0);
               const showEdge = Boolean(state.showEdgeLegend && edgeEntries.length > 0);
 
-              const container = ui.elements.legendContainer;
-              const general = state.shownData.general || {};
-              const legendEnabled = general.legend_enabled !== false;
-              const shouldShowLegend = legendEnabled && (showNode || showEdge);
+              ui.elements.legendContainer.style.display = ui.convert.boolToDisplayStyle(showNode || showEdge);
 
-              if(shouldShowLegend){
-                this.applyLegendAppearance(container, general);
-              } else {
-                this.resetLegendAppearance(container);
-              }
-              container.style.display = ui.convert.boolToDisplayStyle(shouldShowLegend);
-
-              if(showNode && shouldShowLegend){
+              if(showNode){
                 ui.elements.nodeLegendSection.style.display = "block";
                 this.renderNodeLegend(nodeEntries);
               } else {
@@ -2634,67 +2399,12 @@
                 ui.deleteChildElements(ui.elements.nodeLegendBody);
               }
 
-              if(showEdge && shouldShowLegend){
+              if(showEdge){
                 ui.elements.edgeLegendSection.style.display = "block";
                 this.renderEdgeLegend(edgeEntries);
               } else {
                 ui.elements.edgeLegendSection.style.display = "none";
                 ui.deleteChildElements(ui.elements.edgeLegendBody);
-              }
-            },
-
-            normalizePosition(position){
-              if(typeof(position) !== "string"){
-                return this.defaultPosition;
-              }
-              let normalized = position.replace(/([a-z])([A-Z])/g, "$1-$2");
-              normalized = normalized.replace(/_/g, "-");
-              normalized = normalized.toLowerCase();
-              if(Object.prototype.hasOwnProperty.call(this.positionClassMap, normalized)){
-                return normalized;
-              }
-              return this.defaultPosition;
-            },
-
-            getPositionClass(position){
-              const normalized = this.normalizePosition(position);
-              return this.positionClassMap[normalized] || this.positionClassMap[this.defaultPosition];
-            },
-
-            resetLegendAppearance(container){
-              const legend = this;
-              legend.positionClasses.forEach(function(className){
-                container.classList.remove(className);
-              });
-              container.style.backgroundColor = "";
-              container.style.borderColor = "";
-              container.style.opacity = "";
-            },
-
-            applyLegendAppearance(container, general){
-              const legend = this;
-              legend.positionClasses.forEach(function(className){
-                container.classList.remove(className);
-              });
-              const positionClass = legend.getPositionClass(general.legend_position);
-              if(positionClass){
-                container.classList.add(positionClass);
-              }
-              if(typeof(general.legend_background_color) === "string" && general.legend_background_color !== ""){
-                container.style.backgroundColor = general.legend_background_color;
-              } else {
-                container.style.backgroundColor = "";
-              }
-              if(typeof(general.legend_border_color) === "string" && general.legend_border_color !== ""){
-                container.style.borderColor = general.legend_border_color;
-              } else {
-                container.style.borderColor = "";
-              }
-              if(typeof(general.legend_opacity) === "number" && isFinite(general.legend_opacity)){
-                const clampedOpacity = Math.min(1, Math.max(0, general.legend_opacity));
-                container.style.opacity = String(clampedOpacity);
-              } else {
-                container.style.opacity = "";
               }
             },
 

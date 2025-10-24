@@ -27,7 +27,7 @@ def vis(data,
         layout_algorithm_active=True, layout_algorithm='barnesHut',
         gravitational_constant=-2000.0, central_gravity=0.1, spring_length=70.0,
         spring_constant=0.1, avoid_overlap=0.0,
-        show_node_legend=True, show_edge_legend=True,
+        show_node_legend=False, show_edge_legend=False,
         use_dark_mode=False):
     """Create an interactive graph visualization with HTML/CSS/JS based on vis.js.
 
@@ -193,12 +193,10 @@ def vis(data,
         "hierarchicalRepulsion".
     show_node_legend : bool
         If True and legend entries are provided in the graph metadata under ``node_legend``,
-        a node legend panel is shown. Defaults to True so legends are displayed whenever
-        metadata supplies entries.
+        a node legend panel is shown.
     show_edge_legend : bool
         If True and legend entries are provided in the graph metadata under ``edge_legend``,
-        an edge legend panel is shown. Defaults to True so legends are displayed whenever
-        metadata supplies entries.
+        an edge legend panel is shown.
     use_dark_mode : bool
         If True, the interface is rendered with a dark theme instead of the default light theme.
 

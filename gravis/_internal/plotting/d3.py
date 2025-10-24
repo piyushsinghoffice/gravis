@@ -35,7 +35,7 @@ def d3(data,
        use_x_positioning_force=False, x_positioning_force_strength=0.2,
        use_y_positioning_force=False, y_positioning_force_strength=0.2,
        use_centering_force=True,
-       show_node_legend=True, show_edge_legend=True,
+       show_node_legend=False, show_edge_legend=False,
        use_dark_mode=False):
     """Create an interactive graph visualization with HTML/CSS/JS based on d3.v7.js.
 
@@ -142,12 +142,10 @@ def d3(data,
         Name of the font that is used for edge labels.
     show_node_legend : bool
         If True and legend entries are provided in the graph metadata under ``node_legend``,
-        a node legend panel is shown. Defaults to True so legends are displayed whenever
-        metadata supplies entries.
+        a node legend panel is shown.
     show_edge_legend : bool
         If True and legend entries are provided in the graph metadata under ``edge_legend``,
-        an edge legend panel is shown. Defaults to True so legends are displayed whenever
-        metadata supplies entries.
+        an edge legend panel is shown.
     zoom_factor : int, float
         Factor that modifies how close the camera is to the drawing area on load.
     large_graph_threshold : int, float
