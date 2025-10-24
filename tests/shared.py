@@ -1,5 +1,9 @@
+import functools
 import inspect
 import os
+import sys
+import urllib.error
+import urllib.request
 from copy import deepcopy
 
 
@@ -9,7 +13,30 @@ def get_path_of_this_file():
 
 
 TESTFILE_DIR = os.path.dirname(get_path_of_this_file())
+# Ensure the project root is importable so the local ``gravis`` package can be
+# imported when the tests are executed directly from within the ``tests``
+# directory (for example via ``pytest`` or ``python tests/...``).
+PROJECT_ROOT = os.path.dirname(TESTFILE_DIR)
+if PROJECT_ROOT not in sys.path:
+    sys.path.insert(0, PROJECT_ROOT)
 IN_DIR = os.path.join(TESTFILE_DIR, 'in')
+
+
+@functools.lru_cache()
+def has_network_access():
+    """Return ``True`` when at least one well-known URL can be reached."""
+
+    test_urls = (
+        'https://upload.wikimedia.org/wikipedia/commons/e/e4/Infobox_info_icon.svg',
+        'https://upload.wikimedia.org/wikipedia/commons/a/a9/Example.jpg',
+    )
+    for url in test_urls:
+        try:
+            with urllib.request.urlopen(url, timeout=5):
+                return True
+        except (urllib.error.URLError, urllib.error.HTTPError, TimeoutError, OSError):
+            continue
+    return False
 
 
 def construct_testdata_gjgf():
