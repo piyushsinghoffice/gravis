@@ -1255,8 +1255,18 @@
               }
             },
 
+            resolveLegendEntries(obj, prop){
+              if(obj && obj.metadata && typeof(obj.metadata[prop]) !== "undefined"){
+                return obj.metadata[prop];
+              }
+              if(obj && typeof(obj[prop]) !== "undefined"){
+                return obj[prop];
+              }
+              return [];
+            },
+
             parseNodeLegendEntries(obj, general){
-              const raw = (obj && obj.metadata) ? obj.metadata.node_legend : [];
+              const raw = this.resolveLegendEntries(obj, "node_legend");
               const entries = [];
               if(Array.isArray(raw)){
                 for(let i=0; i<raw.length; i++){
@@ -1309,7 +1319,7 @@
             },
 
             parseEdgeLegendEntries(obj, general){
-              const raw = (obj && obj.metadata) ? obj.metadata.edge_legend : [];
+              const raw = this.resolveLegendEntries(obj, "edge_legend");
               const entries = [];
               if(Array.isArray(raw)){
                 for(let i=0; i<raw.length; i++){
