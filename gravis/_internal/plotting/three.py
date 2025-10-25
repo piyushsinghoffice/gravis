@@ -34,7 +34,7 @@ def three(data,
           use_y_positioning_force=False, y_positioning_force_strength=0.2,
           use_z_positioning_force=False, z_positioning_force_strength=0.2,
           use_centering_force=True,
-          use_dark_mode=False):
+          use_dark_mode=False, legend_code=""):
     """Create an interactive graph visualization with HTML/CSS/JS based on 3d-force-graph.js.
 
     The library 3d-force-graph.js uses three.js to create a 3d visualization in WebGL,
@@ -241,6 +241,8 @@ def three(data,
         if all nodes are fixed and then a single one is released by dragging it.
     use_dark_mode : bool
         If True, the interface is rendered with a dark theme instead of the default light theme.
+    legend_code : str
+        Custom HTML code for the legend section of the visualization.
 
     Returns
     -------
@@ -311,6 +313,8 @@ def three(data,
     _ca(z_positioning_force_strength, 'z_positioning_force_strength', (int, float))
     _ca(use_centering_force, 'use_centering_force', bool)
     _ca(use_dark_mode, 'use_dark_mode', bool)
+    _ca(legend_code, 'legend_code', str)
+
     data = _internal.normalize_graph_data(data)
 
     # Transformation
@@ -327,6 +331,7 @@ def three(data,
         'SHOW_MENU': _ts.to_json(show_menu),
         'SHOW_MENU_TOGGLE_BUTTON': _ts.to_json(show_menu_toggle_button),
         'USE_DARK_MODE': _ts.to_json(use_dark_mode),
+        'LEGEND-CODE': legend_code,
 
         'SHOW_NODE': _ts.to_json(show_node),
         'NODE_SIZE_FACTOR': _ts.to_json(node_size_factor),

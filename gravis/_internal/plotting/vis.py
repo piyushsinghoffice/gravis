@@ -27,7 +27,7 @@ def vis(data,
         layout_algorithm_active=True, layout_algorithm='barnesHut',
         gravitational_constant=-2000.0, central_gravity=0.1, spring_length=70.0,
         spring_constant=0.1, avoid_overlap=0.0,
-        use_dark_mode=False):
+        use_dark_mode=False, legend_code=""):
     """Create an interactive graph visualization with HTML/CSS/JS based on vis.js.
 
     Note
@@ -192,6 +192,8 @@ def vis(data,
         "hierarchicalRepulsion".
     use_dark_mode : bool
         If True, the interface is rendered with a dark theme instead of the default light theme.
+    legend_code : str
+        Custom HTML code for the legend section of the visualization.
 
     Returns
     -------
@@ -252,6 +254,7 @@ def vis(data,
     _ca(spring_constant, 'spring_constant', (int, float))
     _ca(avoid_overlap, 'avoid_overlap', (int, float))
     _ca(use_dark_mode, 'use_dark_mode', bool)
+    _ca(legend_code, 'legend_code', str)
     data = _internal.normalize_graph_data(data)
 
     # Transformation
@@ -267,6 +270,7 @@ def vis(data,
         'SHOW_MENU': _ts.to_json(show_menu),
         'SHOW_MENU_TOGGLE_BUTTON': _ts.to_json(show_menu_toggle_button),
         'USE_DARK_MODE': _ts.to_json(use_dark_mode),
+        'LEGEND-CODE': legend_code,
 
         'SHOW_NODE': _ts.to_json(show_node),
         'NODE_SIZE_FACTOR': _ts.to_json(node_size_factor),
