@@ -288,7 +288,7 @@ class LegendBuilder:
     # HTML GENERATION
     # ------------------------------------------------------------------
     @staticmethod
-    def build_html(graph_data: Dict[str, Any], dark_mode: bool = False) -> str:
+    def build_html(graph_data: Dict[str, Any], dark_mode: bool = False, scale_node: float = 1.0, scale_edge: float = 1.0) -> str:
         """
         Build a modern, theme-aware HTML legend from graph data.
         
@@ -380,9 +380,9 @@ class LegendBuilder:
                 html_parts.append(
                     f'<li style="display:flex; align-items:center; '
                     f'margin:{LegendBuilder.ITEM_MARGIN}px 0;">'
-                    f'<span style="display:inline-block; width:{size}px; height:{size}px; '
+                    f'<span style="display:inline-block; width:{size*scale_node}px; height:{size*scale_node}px; '
                     f'border-radius:{shape_css}; background:{color}; '
-                    f'border:{border_width}px solid {border_color}; '
+                    f'border:{border_width*scale_node}px solid {border_color}; '
                     f'margin-right:10px; flex-shrink:0;" '
                     f'aria-hidden="true"></span>'
                     f'<span>{safe_label}</span></li>'
@@ -426,7 +426,7 @@ class LegendBuilder:
                     f'aria-hidden="true">'
                     f'<line x1="0" y1="{edge_width}" '
                     f'x2="{LegendBuilder.SVG_LINE_LENGTH}" y2="{edge_width}" '
-                    f'stroke="{stroke_color}" stroke-width="{edge_width/10}" '
+                    f'stroke="{stroke_color}" stroke-width="{edge_width*scale_edge}" '
                     f'stroke-dasharray="{dash_pattern}" stroke-linecap="round" />'
                     f'</svg>'
                     f'<span>{safe_label}</span></li>'
