@@ -11,9 +11,11 @@ __all__ = [
     'd3',
     'vis',
     'three',
+    'legends',
 ]
 
 __version__ = '0.1.0'
 
 from ._internal.conversion import convert
 from ._internal.plotting import d3, three, vis
+from ._internal.features import legends

@@ -329,7 +329,7 @@ class LegendBuilder:
             f'border:1px solid {palette["border"]}; border-radius:12px; '
             f'box-shadow:0 2px 8px rgba(0,0,0,0.15); padding:16px 20px; '
             f'width:fit-content; max-width:260px; opacity:{legend.opacity}; '
-            f'backdrop-filter:blur(6px);">'
+            f'backdrop-filter:blur(16px);">'
         ]
 
         html_parts.append(
